@@ -40,6 +40,7 @@ import {
 } from '@platform/domain'
 import { createPlatformLogger, resolveCorrelationId } from '@platform/observability'
 import Fastify, { LogController } from 'fastify'
+import fastifyRawBody from 'fastify-raw-body'
 import { z } from 'zod'
 
 import { LocalAuthenticationAdapter, OidcAuthenticationAdapter } from './authentication.js'
@@ -60,6 +61,16 @@ export interface BuildApiOptions {
   readonly authentication?: AuthenticationPort
   readonly config: ApiConfig
   readonly githubOnboardingService?: GithubOnboardingService
+  readonly githubWebhookHandler?: {
+    handle(
+      delivery: {
+        readonly deliveryId: string
+        readonly eventType: string
+        readonly signature: string
+      },
+      payload: Uint8Array,
+    ): Promise<readonly { readonly status: string }[]>
+  }
   readonly changeRequestService?: ChangeRequestService
   readonly changeRequestStore?: ChangeRequestStore
   readonly attachmentScanner?: AttachmentScannerPort
@@ -127,6 +138,43 @@ export function buildApi(options: BuildApiOptions) {
     logController: new LogController({ disableRequestLogging: true }),
     loggerInstance: logger,
   })
+  void app
+    .register(fastifyRawBody, { encoding: false, global: false, runFirst: true })
+    .after(() => {
+      app.post(
+        '/v1/providers/github/webhook',
+        { config: { rawBody: true } },
+        async (request, reply) => {
+          const deliveryId = singleHeader(request.headers['x-github-delivery'])
+          const eventType = singleHeader(request.headers['x-github-event'])
+          const signature = singleHeader(request.headers['x-hub-signature-256'])
+          if (
+            deliveryId === undefined ||
+            !/^[a-zA-Z0-9-]{1,128}$/u.test(deliveryId) ||
+            eventType === undefined ||
+            signature === undefined ||
+            !/^sha256=[a-f0-9]{64}$/u.test(signature) ||
+            !(request.rawBody instanceof Buffer)
+          ) {
+            throw validationFailed(request.id)
+          }
+          if (options.githubWebhookHandler === undefined) {
+            throw new PlatformError({
+              code: 'DEPENDENCY_UNAVAILABLE',
+              correlationId: request.id,
+              retryable: true,
+              safeMessage: 'GitHub webhook processing is unavailable.',
+            })
+          }
+          const results = await options.githubWebhookHandler.handle(
+            { deliveryId, eventType, signature },
+            request.rawBody,
+          )
+          if (results.every(({ status }) => status === 'rejected')) void reply.code(401)
+          return { schemaVersion: '1', results }
+        },
+      )
+    })
 
   app.addHook('onSend', (request, reply, payload, done) => {
     void reply.header('x-correlation-id', request.id)

@@ -1,9 +1,9 @@
 import { buildWorkerApp } from './app.js'
 import { loadWorkerConfig } from './config.js'
-import { WorkerRuntime } from './runtime.js'
+import { createConfiguredWorkerRuntime } from './runner-dispatch-composition.js'
 
 const config = loadWorkerConfig()
-const runtime = new WorkerRuntime()
+const runtime = createConfiguredWorkerRuntime(config)
 await runtime.start()
 
 const app = buildWorkerApp({ config, runtime })

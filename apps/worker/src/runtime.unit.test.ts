@@ -21,4 +21,38 @@ describe('worker process lifecycle', () => {
     await runtime.start()
     await expect(runtime.start()).rejects.toThrow(/cannot start from ready/)
   })
+
+  it('pumps one durable dispatch at a time and waits for the active poll during shutdown', async () => {
+    let release!: () => void
+    const entered = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    let started!: () => void
+    const firstPoll = new Promise<void>((resolve) => {
+      started = resolve
+    })
+    let calls = 0
+    const runtime = new WorkerRuntime({
+      dispatch: {
+        async runOne(workerId) {
+          expect(workerId).toBe('worker-test')
+          calls += 1
+          started()
+          await entered
+          return true
+        },
+      },
+      pollIntervalMs: 10,
+      workerId: 'worker-test',
+    })
+    await runtime.start()
+    await firstPoll
+    const stopping = runtime.stop()
+    expect(runtime.state).toBe('stopping')
+    expect(calls).toBe(1)
+    release()
+    await stopping
+    expect(runtime.state).toBe('stopped')
+    expect(calls).toBe(1)
+  })
 })

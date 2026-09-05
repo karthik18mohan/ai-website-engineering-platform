@@ -1,38 +1,60 @@
 # Continuation Prompt
 
-Continue the AI Website Engineering Platform in `C:\Users\HP\Desktop\ai-website-engineering-platform` from completed branch `codex/m07-planner-policy`.
+Continue the AI Website Engineering Platform in
+`C:\Users\HP\Desktop\ai-website-engineering-platform` on branch
+`codex/m08-isolated-runner`.
 
-Read `AGENTS.md`, the authoritative SRS PDF, `docs/IMPLEMENTATION_PLAN.md`, `docs/IMPLEMENTATION_STATUS.md`, `docs/DECISIONS.md`, and `docs/SESSION_HANDOFF.md`, then inspect Git state. Preserve concurrent work.
+Read `AGENTS.md`, the authoritative SRS PDF, `docs/IMPLEMENTATION_PLAN.md`,
+`docs/IMPLEMENTATION_STATUS.md`, `docs/DECISIONS.md`,
+`docs/SESSION_HANDOFF.md`, and `docs/M08_DURABILITY_BENCHMARK_REPORT.md`, then
+inspect Git/worktree/Vercel state. Do not redo completed infrastructure or the
+external-readiness audit.
 
-## Current checkpoint
+## Exact checkpoint
 
-M01 and M02 are complete. M02 completion record `b7203a6` is pushed; draft PR #2 remains open and GitHub CI run 31456298365 passed, including ephemeral PostgreSQL migration. Do not repeat completed work.
+- M01-M07 are complete. M08 remains in progress; production selection and
+  production deployment are not authorized.
+- Main implementation commit `adf03ad` contains protected Private Blob artifacts
+  and migration `0009`, Temporal SDK 1.22.0 benchmark code/tests, the raw GitHub
+  webhook route, live VCR/Sandbox benchmark support, and the benchmark report.
+- Live Temporal checkpoint `ee7b681` corrects the TypeScript worker entrypoint,
+  suppresses sensitive test metadata, records the completed Cloud scenario
+  matrix, and applies compatible dependency security updates.
+- Isolated Workflow commits are pushed: stable `b2a2e6389adbef2914d3a08f83c8761907820876`
+  on `benchmark/workflow-stable` and beta `e2f9fb1993187b66b9154dc98d77d3571445faed`
+  on `benchmark/workflow-beta5`. Never merge either benchmark branch into main.
+- Stable and beta local Workflow tests passed 4/4 and builds 11/11. Guarded
+  Preview basic runs completed on deployment suffixes `f5vqrvhb6` and
+  `exhmk5ete`. SDK 5 beta is evaluation-only.
+- Private VCR image digest is
+  `sha256:cfc9b64d4b5ccc2d7a88981157d19a7428825055bc37ff312a8dd40aa0fca67f`,
+  linux/amd64, 110.5 MB. Live Sandbox evidence: 1,041 ms startup, 717 ms command,
+  2,384 ms teardown, UID 10001, deny-all network, forced failure exit 1.
+- GitHub read-only verification passed for private repository ID `1303930605`,
+  App ID `4626913`, installation ID `154456584`, selected-repository scope,
+  Push-only event, Contents/Metadata read and no Pull requests permission.
+- Main validation passed: typecheck/build 12/12, unit 82, contract 58,
+  integration 85 with one live PostgreSQL skip, migrations 20,
+  browser/accessibility 4, secret scan 233, high dependency threshold passed.
+  Four moderate development `esbuild` advisories remain; do not force-fix them.
 
-M03 is complete. Completion record `917d1f3` is pushed; draft PR #3 is stacked on `codex/m02-projects-rbac`; final GitHub CI run 31459194718, job 93679135438, passed full validation and ephemeral PostgreSQL migration.
+## 2026-09-05 checkpoint and next work
 
-M04 is complete. Completion record `84b0156` is pushed; draft PR #4 is stacked on `codex/m03-provider-framework`; final GitHub CI run 31463150845, job 93690568730, passed full validation and ephemeral PostgreSQL migration. Provider evidence remains explicitly mock/contract.
+The Temporal credential blocker is resolved locally. Live Cloud basic, retry,
+parallel, 1 MiB payload, approval, 60-second timer, permanent-failure,
+cancellation, duplicate-start and exact-process worker interruption/restart
+scenarios reached their expected outcomes. The worker is stopped. A minimal
+launcher fix selects the TypeScript workflow source during `tsx` execution and
+the compiled JavaScript workflow after build. Do not repeat this matrix merely
+to confirm the credential.
 
-M05 is complete. Completion record `ff7fd6f` is pushed; draft PR #5 is stacked on `codex/m04-github-onboarding`. Final GitHub CI run 31466267638, job 93699691293, passed full validation and ephemeral PostgreSQL migration.
-
-M06 is complete. Implementation `333d0d0` and checkpoint `c7f5bc0` are pushed; draft PR #6 is stacked on the completed M05 branch. GitHub CI run 31473572456, job 93722088032, passed full validation and ephemeral PostgreSQL migration. The accepted scope includes strict ChangeRequest/RequirementSpec/review contracts; all eight modes; immutable original prompt and revisioned corrections; durable tenant-scoped/idempotent PostgreSQL persistence with migration `0004`; authenticated create/review APIs; accessible `/changes/new` intake and review; deterministic attachment scanning; and an AI-controller-only Requirement role with denial-before-output evidence. ADR-015 records the decision.
-
-M07 is complete. Foundation `5a49f97`, governed API `94d34b7`, and analysis-gate implementation `0c18efd` are pushed; draft PR #7 is stacked on completed M06. Final GitHub CI run 31494692860, job 93789359220, passed full validation and ephemeral PostgreSQL migration. The completed milestone includes versioned execution plan/policy/approval and specialized-analysis contracts; deterministic Low/Medium/High/Blocked classification; tenant-scoped persistence/idempotency/audit; authenticated planning and approval APIs; high-risk pre-mutation pause; current multi-gate approvals; blocked no-relaxation behavior; and typed completed Architecture/UI/Security evidence bound to requirement, base commit, and policy digest. ADR-016 records the decisions.
-
-Implementation `94d34b7` and checkpoint `8ee4b4a` remain historical M07 service/API evidence. Do not repeat them.
-
-Final M07 local evidence: formatting/lint passed; typecheck and build passed 10/10 packages; unit 13 files / 70 tests; contract 6 files / 36 tests; integration 11 files / 40 tests with 1 file / 1 live PostgreSQL test skipped; serialized migration validation 5 files / 17 tests; browser/accessibility 4 tests; secret scan 168 files. Approved-network `npm run security:deps` exited 0 with the unchanged four moderate `esbuild` advisories. Missing/mismatched/stale analysis fixtures stop before persistence, and incomplete controller evidence stops without retry. The parallel PGlite setup timeouts were infrastructure-only; the serialized rerun and GitHub ephemeral PostgreSQL step passed.
-
-Local M06 evidence: formatting/lint passed; 10/10 typecheck and build; unit 12 files / 56 tests; contract 5 files / 32 tests; integration 9 files / 29 tests with 1 file / 1 live PostgreSQL test skipped; migration 4 files / 14 tests; browser/accessibility 4 tests; secret scan 158 files; dependency tree exit 0. Approved-network `npm run security:deps` exited 0 with the unchanged four moderate `esbuild` advisories. The sandboxed audit transport failure is infrastructure-only.
-
-Local M05 evidence: formatting/lint passed; typecheck and build passed 10/10 packages; unit 11 files / 44 tests; contract 4 files / 27 tests; integration 7 files / 23 tests with 1 file / 1 live PostgreSQL test skipped; migration 3 files / 11 tests; browser/accessibility 3 tests; corrected secret scan 147 files. Approved-network `npm run security:deps` exited 0 with the known 4 moderate `esbuild` advisories; `npm ls --omit=dev --all` exited 0.
-
-The local `gh` token remains invalid, but SSH push and the connected GitHub app succeeded. Continue using authenticated in-scope paths; never expose credentials or merge autonomously.
-
-## Next exact tasks
-
-1. Commit and push the M07 completion record and confirm its resulting CI remains green.
-2. Create `codex/m08-isolated-runner` from completed M07 and begin the M08 runner port/profile contracts in milestone order.
-3. Preserve immutable base commit, tenant scope, orchestrator authority, deny-by-default network/secrets/tool access, artifact integrity, and explicit local-mock versus production-isolation labeling.
-4. Do not make a live model call before the minimum AI Cost Controller exists, treat repository content as authority, transmit a full repository, or merge autonomously.
-
-Never expose secrets, invoke an LLM outside the AI Cost Controller, weaken tenant scoping or append-only audit, production-deploy, modify production DNS/domains/secrets, force-push, push to `main`, merge a PR, or reset a non-local database.
+1. Obtain an explicitly disposable PostgreSQL benchmark URL and run a benchmark
+   record through the live OIDC-backed Private
+   Blob adapter to prove private put/read/delete/GC composition without exposing a
+   Blob URL or token.
+2. Obtain repeated common-workload latency/cost and managed-runtime interruption
+   evidence for both finalists. Preserve the USD 50/month Temporal target.
+3. Update ADR-007 only after those common gates are comparable. Do not select a
+   production engine unless project policy and complete evidence permit it.
+4. Validate, commit stable checkpoints, append the external local-only change
+   log, push `codex/m08-isolated-runner`, and monitor PR #8 CI. Never merge it.

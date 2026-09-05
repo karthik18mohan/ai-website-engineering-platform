@@ -21,10 +21,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --root ../.. packages/database/src/client.unit.test.ts packages/database/src/migration.integration.test.ts packages/database/src/m02-migration.integration.test.ts packages/database/src/m04-migration.integration.test.ts packages/database/src/m06-migration.integration.test.ts packages/database/src/m07-migration.integration.test.ts packages/database/src/postgres-migration.integration.test.ts",
+    "test": "vitest run --root ../.. packages/database/src/client.unit.test.ts packages/database/src/migration.integration.test.ts packages/database/src/m02-migration.integration.test.ts packages/database/src/m04-migration.integration.test.ts packages/database/src/m06-migration.integration.test.ts packages/database/src/m07-migration.integration.test.ts packages/database/src/m08-migration.integration.test.ts packages/database/src/postgres-migration.integration.test.ts",
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "db:migrate": "node dist/migrate.js",
-    "db:migrate:check": "vitest run --root ../.. packages/database/src/migration.integration.test.ts packages/database/src/m02-migration.integration.test.ts packages/database/src/m04-migration.integration.test.ts packages/database/src/m06-migration.integration.test.ts packages/database/src/m07-migration.integration.test.ts",
+    "db:migrate:check": "vitest run --root ../.. packages/database/src/migration.integration.test.ts packages/database/src/m02-migration.integration.test.ts packages/database/src/m04-migration.integration.test.ts packages/database/src/m06-migration.integration.test.ts packages/database/src/m07-migration.integration.test.ts packages/database/src/m08-migration.integration.test.ts",
     "db:migrate:integration": "vitest run --root ../.. packages/database/src/postgres-migration.integration.test.ts"
   },
   "dependencies": {

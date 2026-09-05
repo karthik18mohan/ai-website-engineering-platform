@@ -1,0 +1,16 @@
+.git
+.github
+.env
+.env.*
+*.pem
+.vercel
+.next
+.turbo
+**/dist
+**/node_modules
+docs/product
+node_modules
+output
+playwright-report
+test-results
+tmp

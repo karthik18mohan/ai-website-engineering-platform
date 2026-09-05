@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+  bigint,
   check,
   boolean,
   foreignKey,
@@ -478,6 +479,12 @@ export const runs = pgTable(
       table.projectId,
       table.id,
     ),
+    unique('runs_tenant_id_plan_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.id,
+      table.executionPlanId,
+    ),
     foreignKey({
       columns: [table.organizationId, table.projectId, table.changeRequestId],
       foreignColumns: [changeRequests.organizationId, changeRequests.projectId, changeRequests.id],
@@ -568,6 +575,506 @@ export const approvals = pgTable(
   ],
 )
 
+export const runnerWorkspaces = pgTable(
+  'runner_workspaces',
+  {
+    id: uuid('id').primaryKey(),
+    organizationId: uuid('organization_id').notNull(),
+    projectId: uuid('project_id').notNull(),
+    runId: uuid('run_id').notNull(),
+    executionPlanId: uuid('execution_plan_id').notNull(),
+    idempotencyKey: text('idempotency_key').notNull(),
+    requestDigest: text('request_digest').notNull(),
+    baseCommit: text('base_commit').notNull(),
+    profileDigest: text('profile_digest').notNull(),
+    backendClass: text('backend_class').notNull(),
+    profile: jsonb('profile').notNull(),
+    checkoutEvidence: jsonb('checkout_evidence').notNull(),
+    state: text('state').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull(),
+    expiresAt: timestamp('expires_at', { mode: 'date', withTimezone: true }).notNull(),
+  },
+  (table) => [
+    unique('runner_workspaces_organization_project_id_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.id,
+    ),
+    unique('runner_workspaces_tenant_run_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.runId,
+    ),
+    unique('runner_workspaces_tenant_idempotency_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.idempotencyKey,
+    ),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.runId, table.executionPlanId],
+      foreignColumns: [runs.organizationId, runs.projectId, runs.id, runs.executionPlanId],
+      name: 'runner_workspaces_run_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.executionPlanId],
+      foreignColumns: [executionPlans.organizationId, executionPlans.projectId, executionPlans.id],
+      name: 'runner_workspaces_plan_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    check('runner_workspaces_request_digest_check', sql`length(${table.requestDigest}) = 64`),
+    check(
+      'runner_workspaces_idempotency_key_check',
+      sql`length(${table.idempotencyKey}) between 8 and 256`,
+    ),
+    check('runner_workspaces_base_commit_check', sql`length(${table.baseCommit}) = 40`),
+    check('runner_workspaces_profile_digest_check', sql`length(${table.profileDigest}) = 64`),
+    check(
+      'runner_workspaces_backend_class_check',
+      sql`${table.backendClass} in ('conformance_fixture', 'production_isolation')`,
+    ),
+    check(
+      'runner_workspaces_state_check',
+      sql`${table.state} in ('ready', 'cancelled', 'destroyed')`,
+    ),
+    check('runner_workspaces_profile_check', sql`jsonb_typeof(${table.profile}) = 'object'`),
+    check(
+      'runner_workspaces_checkout_evidence_check',
+      sql`jsonb_typeof(${table.checkoutEvidence}) = 'object'`,
+    ),
+  ],
+)
+
+export const runnerCommands = pgTable(
+  'runner_commands',
+  {
+    id: uuid('id').primaryKey(),
+    organizationId: uuid('organization_id').notNull(),
+    projectId: uuid('project_id').notNull(),
+    runId: uuid('run_id').notNull(),
+    workspaceId: uuid('workspace_id').notNull(),
+    idempotencyKey: text('idempotency_key').notNull(),
+    requestDigest: text('request_digest').notNull(),
+    baseCommit: text('base_commit').notNull(),
+    profileDigest: text('profile_digest').notNull(),
+    tool: text('tool').notNull(),
+    executable: text('executable').notNull(),
+    workingDirectory: text('working_directory').notNull(),
+    timeoutMs: integer('timeout_ms').notNull(),
+    executionKind: text('execution_kind').notNull(),
+    status: text('status').notNull(),
+    exitCode: integer('exit_code'),
+    rejectionCode: text('rejection_code'),
+    stdoutRef: jsonb('stdout_ref'),
+    stderrRef: jsonb('stderr_ref'),
+    startedAt: timestamp('started_at', { mode: 'date', withTimezone: true }).notNull(),
+    completedAt: timestamp('completed_at', { mode: 'date', withTimezone: true }).notNull(),
+  },
+  (table) => [
+    unique('runner_commands_organization_project_id_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.id,
+    ),
+    unique('runner_commands_tenant_idempotency_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.idempotencyKey,
+    ),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.workspaceId],
+      foreignColumns: [
+        runnerWorkspaces.organizationId,
+        runnerWorkspaces.projectId,
+        runnerWorkspaces.id,
+      ],
+      name: 'runner_commands_workspace_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.runId],
+      foreignColumns: [runs.organizationId, runs.projectId, runs.id],
+      name: 'runner_commands_run_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    check('runner_commands_request_digest_check', sql`length(${table.requestDigest}) = 64`),
+    check(
+      'runner_commands_idempotency_key_check',
+      sql`length(${table.idempotencyKey}) between 8 and 256`,
+    ),
+    check('runner_commands_base_commit_check', sql`length(${table.baseCommit}) = 40`),
+    check('runner_commands_profile_digest_check', sql`length(${table.profileDigest}) = 64`),
+    check('runner_commands_timeout_check', sql`${table.timeoutMs} between 100 and 3600000`),
+    check(
+      'runner_commands_execution_kind_check',
+      sql`${table.executionKind} in ('simulated_conformance', 'isolated_runtime')`,
+    ),
+    check(
+      'runner_commands_status_check',
+      sql`${table.status} in ('succeeded', 'failed', 'cancelled', 'rejected')`,
+    ),
+  ],
+)
+
+export const runnerArtifacts = pgTable(
+  'runner_artifacts',
+  {
+    organizationId: uuid('organization_id').notNull(),
+    projectId: uuid('project_id').notNull(),
+    runId: uuid('run_id').notNull(),
+    workspaceId: uuid('workspace_id').notNull(),
+    commandId: uuid('command_id').notNull(),
+    path: text('path').notNull(),
+    reference: jsonb('reference').notNull(),
+    digest: text('digest').notNull(),
+    mediaType: text('media_type').notNull(),
+    retentionClass: text('retention_class').notNull(),
+    sizeBytes: bigint('size_bytes', { mode: 'number' }).notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.organizationId, table.projectId, table.commandId, table.path],
+      name: 'runner_artifacts_pk',
+    }),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.commandId],
+      foreignColumns: [runnerCommands.organizationId, runnerCommands.projectId, runnerCommands.id],
+      name: 'runner_artifacts_command_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.workspaceId],
+      foreignColumns: [
+        runnerWorkspaces.organizationId,
+        runnerWorkspaces.projectId,
+        runnerWorkspaces.id,
+      ],
+      name: 'runner_artifacts_workspace_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.runId],
+      foreignColumns: [runs.organizationId, runs.projectId, runs.id],
+      name: 'runner_artifacts_run_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    check(
+      'runner_artifacts_reference_check',
+      sql`jsonb_typeof(${table.reference}) = 'object'
+        AND ${table.reference}->>'digest' = ${table.digest}
+        AND ${table.reference}->>'mediaType' = ${table.mediaType}
+        AND ${table.reference}->>'retentionClass' = ${table.retentionClass}`,
+    ),
+    check('runner_artifacts_digest_check', sql`length(${table.digest}) = 64`),
+    check('runner_artifacts_size_check', sql`${table.sizeBytes} >= 0`),
+  ],
+)
+
+export const protectedArtifacts = pgTable(
+  'protected_artifacts',
+  {
+    artifactId: uuid('artifact_id').primaryKey(),
+    organizationId: uuid('organization_id').notNull(),
+    projectId: uuid('project_id').notNull(),
+    runId: uuid('run_id').notNull(),
+    blobPath: text('blob_path').notNull(),
+    sha256: text('sha256').notNull(),
+    sizeBytes: bigint('size_bytes', { mode: 'number' }).notNull(),
+    mediaType: text('media_type').notNull(),
+    retentionClass: text('retention_class').notNull(),
+    deleteAfter: timestamp('delete_after', { mode: 'date', withTimezone: true }),
+    createdBy: text('created_by').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull(),
+    deletedAt: timestamp('deleted_at', { mode: 'date', withTimezone: true }),
+  },
+  (table) => [
+    unique('protected_artifacts_tenant_id_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.artifactId,
+    ),
+    unique('protected_artifacts_blob_path_unique').on(table.blobPath),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.runId],
+      foreignColumns: [runs.organizationId, runs.projectId, runs.id],
+      name: 'protected_artifacts_run_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    index('protected_artifacts_gc_idx').on(table.deleteAfter),
+    check('protected_artifacts_sha256_check', sql`${table.sha256} ~ '^[a-f0-9]{64}$'`),
+    check('protected_artifacts_size_check', sql`${table.sizeBytes} between 0 and 16777216`),
+    check(
+      'protected_artifacts_retention_check',
+      sql`${table.retentionClass} in ('ephemeral', 'benchmark', 'standard', 'pinned') AND ((${table.retentionClass} = 'pinned') = (${table.deleteAfter} IS NULL))`,
+    ),
+  ],
+)
+
+export const runnerLifecycleRecords = pgTable(
+  'runner_lifecycle_records',
+  {
+    id: uuid('id').primaryKey(),
+    organizationId: uuid('organization_id').notNull(),
+    projectId: uuid('project_id').notNull(),
+    runId: uuid('run_id').notNull(),
+    workspaceId: uuid('workspace_id').notNull(),
+    action: text('action').notNull(),
+    idempotencyKey: text('idempotency_key').notNull(),
+    requestDigest: text('request_digest').notNull(),
+    resultStatus: text('result_status').notNull(),
+    occurredAt: timestamp('occurred_at', { mode: 'date', withTimezone: true }).notNull(),
+  },
+  (table) => [
+    unique('runner_lifecycle_tenant_action_idempotency_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.action,
+      table.idempotencyKey,
+    ),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.workspaceId],
+      foreignColumns: [
+        runnerWorkspaces.organizationId,
+        runnerWorkspaces.projectId,
+        runnerWorkspaces.id,
+      ],
+      name: 'runner_lifecycle_workspace_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.runId],
+      foreignColumns: [runs.organizationId, runs.projectId, runs.id],
+      name: 'runner_lifecycle_run_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    check('runner_lifecycle_action_check', sql`${table.action} in ('cancel', 'cleanup')`),
+    check('runner_lifecycle_request_digest_check', sql`length(${table.requestDigest}) = 64`),
+    check(
+      'runner_lifecycle_idempotency_key_check',
+      sql`length(${table.idempotencyKey}) between 8 and 256`,
+    ),
+    check(
+      'runner_lifecycle_result_status_check',
+      sql`${table.resultStatus} in ('cancelled', 'already_cancelled', 'destroyed', 'already_destroyed')`,
+    ),
+  ],
+)
+
+export const runnerProviderSessions = pgTable(
+  'runner_provider_sessions',
+  {
+    provisionKey: text('provision_key').primaryKey(),
+    organizationId: uuid('organization_id').notNull(),
+    projectId: uuid('project_id').notNull(),
+    runId: uuid('run_id').notNull(),
+    executionPlanId: uuid('execution_plan_id').notNull(),
+    workspaceId: uuid('workspace_id').notNull(),
+    provider: text('provider').notNull(),
+    requestFingerprint: text('request_fingerprint').notNull(),
+    identityDigest: text('identity_digest').notNull(),
+    plan: jsonb('plan').notNull(),
+    profile: jsonb('profile').notNull(),
+    workspace: jsonb('workspace').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('runner_provider_sessions_tenant_provision_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.provisionKey,
+    ),
+    unique('runner_provider_sessions_tenant_workspace_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.workspaceId,
+    ),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.runId, table.executionPlanId],
+      foreignColumns: [runs.organizationId, runs.projectId, runs.id, runs.executionPlanId],
+      name: 'runner_provider_sessions_run_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    check('runner_provider_sessions_provision_key_check', sql`length(${table.provisionKey}) = 64`),
+    check(
+      'runner_provider_sessions_request_fingerprint_check',
+      sql`length(${table.requestFingerprint}) = 64`,
+    ),
+    check(
+      'runner_provider_sessions_identity_digest_check',
+      sql`length(${table.identityDigest}) = 64`,
+    ),
+    check('runner_provider_sessions_provider_check', sql`${table.provider} = 'vercel_sandbox'`),
+    check('runner_provider_sessions_plan_check', sql`jsonb_typeof(${table.plan}) = 'object'`),
+    check('runner_provider_sessions_profile_check', sql`jsonb_typeof(${table.profile}) = 'object'`),
+    check(
+      'runner_provider_sessions_workspace_check',
+      sql`jsonb_typeof(${table.workspace}) = 'object'`,
+    ),
+  ],
+)
+
+export const runnerProviderCommandReplays = pgTable(
+  'runner_provider_command_replays',
+  {
+    organizationId: uuid('organization_id').notNull(),
+    projectId: uuid('project_id').notNull(),
+    provisionKey: text('provision_key').notNull(),
+    commandId: uuid('command_id').notNull(),
+    requestFingerprint: text('request_fingerprint').notNull(),
+    result: jsonb('result').notNull(),
+    completedAt: timestamp('completed_at', { mode: 'date', withTimezone: true }).notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.organizationId, table.projectId, table.commandId],
+      name: 'runner_provider_command_replays_pk',
+    }),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.provisionKey],
+      foreignColumns: [
+        runnerProviderSessions.organizationId,
+        runnerProviderSessions.projectId,
+        runnerProviderSessions.provisionKey,
+      ],
+      name: 'runner_provider_command_replays_session_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    check(
+      'runner_provider_command_replays_fingerprint_check',
+      sql`length(${table.requestFingerprint}) = 64`,
+    ),
+    check(
+      'runner_provider_command_replays_result_check',
+      sql`jsonb_typeof(${table.result}) = 'object'`,
+    ),
+  ],
+)
+
+export const workerDispatches = pgTable(
+  'worker_dispatches',
+  {
+    id: uuid('id').primaryKey(),
+    organizationId: uuid('organization_id').notNull(),
+    projectId: uuid('project_id').notNull(),
+    actorRef: text('actor_ref').notNull(),
+    correlationId: uuid('correlation_id').notNull(),
+    requestedAt: timestamp('requested_at', { mode: 'date', withTimezone: true }).notNull(),
+    idempotencyKey: text('idempotency_key').notNull(),
+    requestDigest: text('request_digest').notNull(),
+    commandRef: jsonb('command_ref').notNull(),
+    status: text('status').notNull(),
+    attemptCount: integer('attempt_count').notNull().default(0),
+    maxAttempts: integer('max_attempts').notNull(),
+    availableAt: timestamp('available_at', { mode: 'date', withTimezone: true }).notNull(),
+    leaseOwner: text('lease_owner'),
+    leaseExpiresAt: timestamp('lease_expires_at', { mode: 'date', withTimezone: true }),
+    lastFailureCode: text('last_failure_code'),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp('completed_at', { mode: 'date', withTimezone: true }),
+  },
+  (table) => [
+    unique('worker_dispatches_tenant_idempotency_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.idempotencyKey,
+    ),
+    unique('worker_dispatches_tenant_id_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.id,
+    ),
+    foreignKey({
+      columns: [table.organizationId, table.projectId],
+      foreignColumns: [projects.organizationId, projects.id],
+      name: 'worker_dispatches_project_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    index('worker_dispatches_claim_idx').on(table.status, table.availableAt),
+    check('worker_dispatches_request_digest_check', sql`length(${table.requestDigest}) = 64`),
+    check(
+      'worker_dispatches_actor_ref_check',
+      sql`${table.actorRef} ~ '^(user|service):[0-9a-f-]{36}$'`,
+    ),
+    check(
+      'worker_dispatches_idempotency_key_check',
+      sql`length(${table.idempotencyKey}) between 8 and 256`,
+    ),
+    check('worker_dispatches_command_ref_check', sql`jsonb_typeof(${table.commandRef}) = 'object'`),
+    check(
+      'worker_dispatches_status_check',
+      sql`${table.status} in ('queued', 'running', 'retry_wait', 'succeeded', 'failed')`,
+    ),
+    check(
+      'worker_dispatches_attempts_check',
+      sql`${table.attemptCount} between 0 and ${table.maxAttempts} AND ${table.maxAttempts} between 1 and 10`,
+    ),
+    check(
+      'worker_dispatches_lease_shape_check',
+      sql`(${table.status} = 'running' AND ${table.leaseOwner} IS NOT NULL AND ${table.leaseExpiresAt} IS NOT NULL) OR (${table.status} <> 'running' AND ${table.leaseOwner} IS NULL AND ${table.leaseExpiresAt} IS NULL)`,
+    ),
+    check(
+      'worker_dispatches_completion_shape_check',
+      sql`(${table.status} in ('succeeded', 'failed')) = (${table.completedAt} IS NOT NULL)`,
+    ),
+  ],
+)
+
+export const workerDispatchAttempts = pgTable(
+  'worker_dispatch_attempts',
+  {
+    id: uuid('id').primaryKey(),
+    organizationId: uuid('organization_id').notNull(),
+    projectId: uuid('project_id').notNull(),
+    dispatchId: uuid('dispatch_id').notNull(),
+    attemptNumber: integer('attempt_number').notNull(),
+    workerId: text('worker_id').notNull(),
+    outcome: text('outcome').notNull(),
+    failureCode: text('failure_code'),
+    startedAt: timestamp('started_at', { mode: 'date', withTimezone: true }).notNull(),
+    completedAt: timestamp('completed_at', { mode: 'date', withTimezone: true }).notNull(),
+    nextAvailableAt: timestamp('next_available_at', { mode: 'date', withTimezone: true }),
+  },
+  (table) => [
+    unique('worker_dispatch_attempts_dispatch_number_unique').on(
+      table.organizationId,
+      table.projectId,
+      table.dispatchId,
+      table.attemptNumber,
+    ),
+    foreignKey({
+      columns: [table.organizationId, table.projectId, table.dispatchId],
+      foreignColumns: [
+        workerDispatches.organizationId,
+        workerDispatches.projectId,
+        workerDispatches.id,
+      ],
+      name: 'worker_dispatch_attempts_dispatch_tenant_fk',
+    })
+      .onDelete('restrict')
+      .onUpdate('restrict'),
+    check('worker_dispatch_attempts_number_check', sql`${table.attemptNumber} between 1 and 10`),
+    check(
+      'worker_dispatch_attempts_outcome_check',
+      sql`${table.outcome} in ('succeeded', 'retry_scheduled', 'failed', 'lease_expired')`,
+    ),
+  ],
+)
+
 export const auditEvents = pgTable(
   'audit_events',
   {
@@ -630,3 +1137,12 @@ export type RequirementSpecRow = typeof requirementSpecs.$inferSelect
 export type ExecutionPlanRow = typeof executionPlans.$inferSelect
 export type RunRow = typeof runs.$inferSelect
 export type ApprovalRow = typeof approvals.$inferSelect
+export type RunnerWorkspaceRow = typeof runnerWorkspaces.$inferSelect
+export type RunnerCommandRow = typeof runnerCommands.$inferSelect
+export type RunnerArtifactRow = typeof runnerArtifacts.$inferSelect
+export type ProtectedArtifactRow = typeof protectedArtifacts.$inferSelect
+export type RunnerLifecycleRecordRow = typeof runnerLifecycleRecords.$inferSelect
+export type RunnerProviderSessionRow = typeof runnerProviderSessions.$inferSelect
+export type RunnerProviderCommandReplayRow = typeof runnerProviderCommandReplays.$inferSelect
+export type WorkerDispatchRow = typeof workerDispatches.$inferSelect
+export type WorkerDispatchAttemptRow = typeof workerDispatchAttempts.$inferSelect

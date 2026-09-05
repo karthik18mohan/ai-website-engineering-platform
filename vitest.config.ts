@@ -12,6 +12,7 @@ export const platformAliases = {
   '@platform/observability': fromRoot('./packages/observability/src/index.ts'),
   '@platform/provider-framework': fromRoot('./packages/provider-framework/src/index.ts'),
   '@platform/repository-intelligence': fromRoot('./packages/repository-intelligence/src/index.ts'),
+  '@platform/vercel-sandbox-runner': fromRoot('./packages/vercel-sandbox-runner/src/index.ts'),
 }
 
 export default defineConfig({

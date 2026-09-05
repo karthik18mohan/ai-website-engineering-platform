@@ -7,8 +7,14 @@ import type {
   GitRepositoryRefV1,
   GithubRepositoryMetadataV1,
   ProviderRequestContextV1,
-  RunnerCommandV1,
-  RunnerResultV1,
+  RunnerCancellationRequestV1,
+  RunnerCleanupRequestV1,
+  RunnerCheckoutBundleV1,
+  RunnerExecutionCommandV1,
+  RunnerExecutionResultV1,
+  RunnerLifecycleResultV1,
+  RunnerWorkspaceRequestV1,
+  RunnerWorkspaceV1,
   SecretReferenceV1,
 } from '@platform/contracts'
 
@@ -42,12 +48,30 @@ export interface ArtifactStorePort {
   put(
     context: ProviderRequestContextV1,
     content: Uint8Array,
-    metadata: { readonly mediaType: string; readonly retentionClass: string },
+    metadata: {
+      readonly artifactId?: string
+      readonly mediaType: string
+      readonly retentionClass: string
+      readonly runId?: string
+    },
   ): Promise<ArtifactReferenceV1>
 }
 
+/** Tenant-scoped access to protected artifact bytes. */
+export interface ArtifactReaderPort {
+  read(context: ProviderRequestContextV1, reference: ArtifactReferenceV1): Promise<Uint8Array>
+}
+
 export interface RunnerProviderPort {
-  execute(command: RunnerCommandV1): Promise<RunnerResultV1>
+  provision(request: RunnerWorkspaceRequestV1): Promise<RunnerWorkspaceV1>
+  execute(command: RunnerExecutionCommandV1): Promise<RunnerExecutionResultV1>
+  cancel(request: RunnerCancellationRequestV1): Promise<RunnerLifecycleResultV1>
+  destroy(request: RunnerCleanupRequestV1): Promise<RunnerLifecycleResultV1>
+}
+
+/** Credential-free immutable checkout acquisition for runner adapters. */
+export interface RunnerCheckoutBundleSourcePort {
+  createBundle(request: RunnerWorkspaceRequestV1): Promise<RunnerCheckoutBundleV1>
 }
 
 export interface OrchestrationProviderPort {

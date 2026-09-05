@@ -5,6 +5,11 @@ const workerConfigSchema = z.object({
   logLevel: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   nodeEnvironment: z.enum(['development', 'test', 'production']).default('development'),
   port: z.coerce.number().int().min(1).max(65_535).default(4001),
+  runnerDispatchEnabled: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
+  runnerDispatchPollIntervalMs: z.coerce.number().int().min(10).max(60_000).default(1_000),
   workerId: z
     .string()
     .min(1)
@@ -22,6 +27,8 @@ export function loadWorkerConfig(environment: NodeJS.ProcessEnv = process.env): 
       logLevel: environment['LOG_LEVEL'],
       nodeEnvironment: environment['NODE_ENV'],
       port: environment['WORKER_HEALTH_PORT'],
+      runnerDispatchEnabled: environment['WORKER_RUNNER_DISPATCH_ENABLED'],
+      runnerDispatchPollIntervalMs: environment['WORKER_RUNNER_DISPATCH_POLL_INTERVAL_MS'],
       workerId: environment['WORKER_ID'],
     }),
   )

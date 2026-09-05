@@ -23,6 +23,7 @@ export const projectPermissionV1Schema = z.enum([
   'project:delete',
   'change:request',
   'change:approve',
+  'run:execute',
   'repository:connect',
   'git:merge',
   'release:promote',

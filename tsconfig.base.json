@@ -31,7 +31,9 @@
       "@platform/github-adapter": ["./packages/github-adapter/src/index.ts"],
       "@platform/observability": ["./packages/observability/src/index.ts"],
       "@platform/provider-framework": ["./packages/provider-framework/src/index.ts"],
-      "@platform/repository-intelligence": ["./packages/repository-intelligence/src/index.ts"]
+      "@platform/repository-intelligence": ["./packages/repository-intelligence/src/index.ts"],
+      "@platform/vercel-blob-artifacts": ["./packages/vercel-blob-artifacts/src/index.ts"],
+      "@platform/vercel-sandbox-runner": ["./packages/vercel-sandbox-runner/src/index.ts"]
     }
   }
 }

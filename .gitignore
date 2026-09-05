@@ -17,4 +17,9 @@ test-results/
 Thumbs.db
 
 tmp/
+.vercel/
+*.pem
 
+.env
+.env.*
+!.env.example

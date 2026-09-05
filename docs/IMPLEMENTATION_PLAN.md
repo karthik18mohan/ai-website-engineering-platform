@@ -70,7 +70,7 @@ Cross-cutting constraints apply throughout: tenant scoping begins in M01/M02; pr
 - **Tests/checks:** Golden risk fixtures including auth, payment, secret, infrastructure, DB migration, destructive, and prohibited requests; approval authorization/staleness; blocked-request audit; deterministic transition/property tests; duplicate approval idempotency; high-risk no-mutation assertion.
 - **Completion evidence:** High-risk fixture is demonstrably paused in `AWAITING_APPROVAL` before workspace creation/file mutation; approved/rejected/blocked audit timeline; plan schema fixtures; test/commit evidence.
 
-## M08 - Isolated runner (not started)
+## M08 - Isolated runner (in progress)
 
 - **Tasks:** Implement runner port and an ephemeral workspace backend based on an immutable base commit; CPU/memory/time/filesystem/process/network/egress controls; command/tool allowlist; approved registry and install-script policy; artifact capture by digest and retention class; cancellation/cleanup; no cloud or production secret exposure; stable idempotency keys and typed runner errors. Select/validate runner image/profile without treating a host-process mock as production isolation.
 - **Dependencies:** M07 approved execution; M04 immutable repository access; M03 runner/artifact/secrets ports; approved container/sandbox runtime is an external prerequisite for production-grade isolation.

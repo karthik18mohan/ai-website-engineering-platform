@@ -15,7 +15,6 @@ import {
   MockDeploymentAdapter,
   MockGitAdapter,
   MockOrchestrationAdapter,
-  MockRunnerAdapter,
   MockSecretsAdapter,
 } from './mocks.js'
 
@@ -61,17 +60,10 @@ describe('M03 provider adapter conformance', () => {
       new TextEncoder().encode('fixture'),
       { mediaType: 'text/plain', retentionClass: 'test' },
     )
-    const runner = await new MockRunnerAdapter().execute({
-      context,
-      command: 'test',
-      arguments: [],
-      timeoutMs: 1000,
-    })
     const dispatch = await new MockOrchestrationAdapter().dispatch(context, artifact)
     expect(git).toEqual({ accessible: true, defaultBranch: 'main' })
     expect(deploy).toMatchObject({ status: 'ready', providerDeploymentId: 'mock-aaaaaaaaaaaa' })
     expect(artifact.digest).toBe(createHash('sha256').update('fixture').digest('hex'))
-    expect(runner.exitCode).toBe(0)
     expect(dispatch.dispatchId).toContain(context.idempotencyKey)
   })
 

@@ -94,19 +94,6 @@ export const artifactReferenceV1Schema = z.object({
   mediaType: z.string().min(1),
   retentionClass: z.string().min(1),
 })
-export const runnerCommandV1Schema = z.object({
-  context: providerRequestContextV1Schema,
-  command: z.string().min(1).max(512),
-  arguments: z.array(z.string().max(2048)).max(128),
-  timeoutMs: z.number().int().positive().max(3_600_000),
-})
-export const runnerResultV1Schema = z.object({
-  schemaVersion: schemaVersionV1,
-  exitCode: z.number().int(),
-  stdoutRef: artifactReferenceV1Schema.optional(),
-  stderrRef: artifactReferenceV1Schema.optional(),
-})
-
 export const aiInvocationRequestV1Schema = z.object({
   schemaVersion: schemaVersionV1,
   context: providerRequestContextV1Schema,
@@ -139,7 +126,5 @@ export type GitRepositoryRefV1 = z.infer<typeof gitRepositoryRefV1Schema>
 export type DeploymentRequestV1 = z.infer<typeof deploymentRequestV1Schema>
 export type DeploymentResultV1 = z.infer<typeof deploymentResultV1Schema>
 export type ArtifactReferenceV1 = z.infer<typeof artifactReferenceV1Schema>
-export type RunnerCommandV1 = z.infer<typeof runnerCommandV1Schema>
-export type RunnerResultV1 = z.infer<typeof runnerResultV1Schema>
 export type AiInvocationRequestV1 = z.infer<typeof aiInvocationRequestV1Schema>
 export type AiInvocationResultV1 = z.infer<typeof aiInvocationResultV1Schema>

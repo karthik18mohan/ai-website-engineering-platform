@@ -10,7 +10,7 @@ import { z } from 'zod'
 
 import type { GithubWebhookVerifier } from './webhook-verifier.js'
 
-const supportedEventSchema = z.enum(['installation', 'repository', 'push'])
+const supportedEventSchema = z.enum(['installation', 'installation_repositories', 'push'])
 const payloadIdentitySchema = z
   .object({
     installation: z.object({ id: z.number().int().positive() }),
@@ -44,7 +44,7 @@ export class GithubWebhookHandler {
     private readonly resolver: GithubWebhookContextResolver,
     private readonly onAccepted: (
       context: GithubWebhookContext,
-      eventType: 'installation' | 'repository' | 'push',
+      eventType: 'installation' | 'installation_repositories' | 'push',
     ) => Promise<void> = () => Promise.resolve(),
     private readonly clock: () => Date = () => new Date(),
   ) {}
@@ -76,7 +76,7 @@ export class GithubWebhookHandler {
 
   private envelope(
     delivery: GithubWebhookDelivery,
-    eventType: 'installation' | 'repository' | 'push',
+    eventType: 'installation' | 'installation_repositories' | 'push',
     context: GithubWebhookContext,
     payload: Uint8Array,
   ): ProviderCallbackEnvelopeV1 {

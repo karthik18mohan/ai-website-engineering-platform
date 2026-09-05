@@ -192,7 +192,7 @@ describe('M04 GitHub App onboarding contract', () => {
 })
 
 describe('M04 GitHub webhook safety', () => {
-  it.each(['installation', 'repository', 'push'] as const)(
+  it.each(['installation', 'installation_repositories', 'push'] as const)(
     'resolves trusted tenant context and processes raw %s payloads',
     async (eventType) => {
       const secret = new TextEncoder().encode('fixture-webhook-secret')
@@ -245,7 +245,7 @@ describe('M04 GitHub webhook safety', () => {
     },
   )
 
-  it.each(['installation', 'repository', 'push'] as const)(
+  it.each(['installation', 'installation_repositories', 'push'] as const)(
     'authenticates and deduplicates %s deliveries',
     async (eventType) => {
       const secret = new TextEncoder().encode('fixture-webhook-secret')

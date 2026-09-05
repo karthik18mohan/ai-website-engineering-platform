@@ -23,6 +23,7 @@ const cases: readonly [OrganizationRoleV1, ProjectPermissionV1, boolean][] = [
   ['reviewer', 'change:approve', true],
   ['reviewer', 'secret:manage', false],
   ['owner', 'repository:connect', true],
+  ['owner', 'run:execute', false],
   ['viewer', 'project:read', true],
   ['viewer', 'repository:connect', false],
   ['viewer', 'change:request', false],

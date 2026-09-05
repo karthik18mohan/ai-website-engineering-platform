@@ -10,7 +10,7 @@ export {
   MockDeploymentAdapter,
   MockGitAdapter,
   MockOrchestrationAdapter,
-  MockRunnerAdapter,
+  ConformanceRunnerFixture,
   MockSecretsAdapter,
   deterministicOpaqueId,
 } from './mocks.js'

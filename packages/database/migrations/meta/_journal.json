@@ -43,6 +43,27 @@
       "when": 1786441200000,
       "tag": "0006_m07_plan_idempotency",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786451400000,
+      "tag": "0007_m08_runner_lifecycle",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786892400000,
+      "tag": "0008_m08_runner_dispatch",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787000400000,
+      "tag": "0009_m08_protected_artifacts",
+      "breakpoints": true
     }
   ]
 }

@@ -16,6 +16,21 @@ export {
   type PlanPolicyAssessment,
 } from './planning-policy.js'
 export {
+  evaluateRunnerCommand,
+  runnerProfileDigest,
+  type RunnerCommandPolicyDecision,
+} from './runner-policy.js'
+export {
+  RunnerOrchestrationService,
+  type PersistedRunnerCommand,
+  type PersistedRunnerLifecycle,
+  type PersistedRunnerWorkspace,
+  type RunnerAuditEvent,
+  type RunnerOrchestrationStore,
+  type RunnerPreparationContext,
+  type RunnerWorkspaceContext,
+} from './runner-orchestration-service.js'
+export {
   ChangeRequestService,
   type AttachmentScannerPort,
   type ChangeRequestAuditEvent,
@@ -52,12 +67,14 @@ export {
 } from './project-service.js'
 export {
   type AiCostControllerPort,
+  type ArtifactReaderPort,
   type ArtifactStorePort,
   type DeploymentProviderPort,
   type GitProviderPort,
   type GithubAppOnboardingPort,
   type OrchestrationProviderPort,
   type RunnerProviderPort,
+  type RunnerCheckoutBundleSourcePort,
   type SecretsPort,
 } from './provider-ports.js'
 export {
