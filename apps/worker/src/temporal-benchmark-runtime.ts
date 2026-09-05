@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import { Connection, WorkflowClient } from '@temporalio/client'
@@ -50,12 +51,16 @@ export async function runTemporalBenchmarkWorker(
     apiKey,
     tls: true,
   })
+  const compiledWorkflowUrl = new URL('./temporal-benchmark-workflow.js', import.meta.url)
+  const workflowUrl = existsSync(compiledWorkflowUrl)
+    ? compiledWorkflowUrl
+    : new URL('./temporal-benchmark-workflow.ts', import.meta.url)
   const worker = await Worker.create({
     activities,
     connection,
     namespace: config.namespace,
     taskQueue: TEMPORAL_BENCHMARK_TASK_QUEUE,
-    workflowsPath: fileURLToPath(new URL('./temporal-benchmark-workflow.js', import.meta.url)),
+    workflowsPath: fileURLToPath(workflowUrl),
   })
   try {
     await worker.run()

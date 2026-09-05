@@ -35,28 +35,23 @@ external-readiness audit.
   browser/accessibility 4, secret scan 233, high dependency threshold passed.
   Four moderate development `esbuild` advisories remain; do not force-fix them.
 
-## Next work
+## 2026-09-05 checkpoint and next work
 
-The current blocker is genuinely external: Vercel Preview returns an encrypted
-placeholder for `TEMPORAL_API_KEY`; Temporal Cloud rejects it as a malformed JWT.
-Ask only for replacement of that Preview variable with a real non-production
-Temporal Cloud API key if it has not changed. Never print or commit the value.
+The Temporal credential blocker is resolved locally. Live Cloud basic, retry,
+parallel, 1 MiB payload, approval, 60-second timer, permanent-failure,
+cancellation, duplicate-start and exact-process worker interruption/restart
+scenarios reached their expected outcomes. The worker is stopped. A minimal
+launcher fix selects the TypeScript workflow source during `tsx` execution and
+the compiled JavaScript workflow after build. Do not repeat this matrix merely
+to confirm the credential.
 
-Once the credential is corrected:
-
-1. Run the Temporal Cloud worker/CLI against
-   `ai-website-platform-nonprod.k9p3k.tmprl.cloud:7233` and capture the same live
-   scenario, interruption, latency, retry, cancellation, idempotency and cost
-   evidence used for Workflow. Keep the USD 50/month evaluation target.
-2. Run a disposable PostgreSQL benchmark run through the live OIDC-backed Private
+1. Obtain an explicitly disposable PostgreSQL benchmark URL and run a benchmark
+   record through the live OIDC-backed Private
    Blob adapter to prove private put/read/delete/GC composition without exposing a
    Blob URL or token.
-3. Update the benchmark report, ADR-007, status and handoff. Do not select a
-   production engine unless the project policy and complete evidence explicitly
-   permit it.
-4. Validate, commit a stable checkpoint, append the external local-only change
+2. Obtain repeated common-workload latency/cost and managed-runtime interruption
+   evidence for both finalists. Preserve the USD 50/month Temporal target.
+3. Update ADR-007 only after those common gates are comparable. Do not select a
+   production engine unless project policy and complete evidence permit it.
+4. Validate, commit stable checkpoints, append the external local-only change
    log, push `codex/m08-isolated-runner`, and monitor PR #8 CI. Never merge it.
-
-If the Temporal credential is still a placeholder, do not repeat completed work.
-Record the unchanged blocker and stop; all other reasonable approved work at this
-checkpoint is complete.

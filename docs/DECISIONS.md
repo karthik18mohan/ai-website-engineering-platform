@@ -278,11 +278,13 @@ Status values: **Accepted**, **Proposed**, **Deferred**, **Superseded**, **Rejec
   substituting a local Temporal server for live Cloud acceptance; selecting an
   engine before common interruption/cost evidence.
 - **Consequences:** Workflow stable and beta have reproducible local and Preview
-  evidence, Temporal has equivalent official time-skipping coverage, and the
-  custom Sandbox image has live non-production evidence. Temporal Cloud remains
-  blocked until a real Preview API key is supplied. ADR-007 remains deferred and
-  M08 remains in progress until the common live failure-injection, latency,
-  idempotency, cancellation, cost and provider-composition gates are observed.
+  evidence, Temporal has official time-skipping coverage plus a 2026-09-05 live
+  Cloud matrix for retry, timer, approval, payload, permanent failure,
+  cancellation, duplicate start and worker restart recovery, and the custom
+  Sandbox image has live non-production evidence. The Temporal credential blocker
+  is resolved without storing or printing the credential. ADR-007 remains deferred
+  and M08 remains in progress until repeated common comparative latency/cost and
+  live protected-artifact provider-composition gates are observed.
 
 ## Open production decisions
 

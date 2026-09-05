@@ -1,4 +1,4 @@
-import { Worker } from '@temporalio/worker'
+import { DefaultLogger, Runtime, Worker } from '@temporalio/worker'
 import { TestWorkflowEnvironment } from '@temporalio/testing'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -11,6 +11,8 @@ import {
   benchmarkApprovalSignal,
   temporalDurabilityBenchmark,
 } from './temporal-benchmark-workflow.js'
+
+Runtime.install({ logger: new DefaultLogger('ERROR', () => undefined) })
 
 describe('Temporal durability benchmark', () => {
   let environment: TestWorkflowEnvironment | undefined

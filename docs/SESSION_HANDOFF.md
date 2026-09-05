@@ -1,6 +1,6 @@
 # Session Handoff
 
-**Checkpoint:** 2026-08-18 02:40:00 +05:30 (Asia/Calcutta)
+**Checkpoint:** 2026-09-05 17:06:00 +05:30 (Asia/Calcutta)
 **Repository:** `C:\Users\HP\Desktop\ai-website-engineering-platform`  
 **Branch:** `codex/m08-isolated-runner`
 **Latest implementation commit:** `adf03ad`; Workflow benchmark commits `b2a2e63` and `e2f9fb1` are pushed on isolated branches
@@ -34,14 +34,20 @@ is private, linux/amd64 and 110.5 MB. Live startup/command/teardown evidence is
 1,041/717/2,384 ms with UID 10001, deny-all network, success exit 0 and forced
 failure exit 1.
 
-The only genuine external blocker is Temporal Cloud authentication: the local
-Preview pull returns an encrypted placeholder for `TEMPORAL_API_KEY`, and the
-Cloud endpoint rejects it as a malformed JWT. A human must replace the Vercel
-Preview variable with a real non-production Temporal Cloud API key. Never print
-or commit it. After that, run the live interruption/latency/cancellation/
-idempotency/cost matrix and a disposable PostgreSQL + live Private Blob composition.
-M08 remains in progress and ADR-007 remains deferred; no production winner is
-selected.
+Temporal Cloud authentication is now resolved locally without printing or
+committing the credential. On 2026-09-05, the live non-production matrix passed
+basic, retry, parallel, 1 MiB payload, approval, 60-second sleep, permanent
+failure, cancellation, duplicate-start replay and worker stop/restart recovery.
+The run uncovered and corrected the TypeScript worker launcher's workflow-path
+selection; focused Temporal integration tests passed 2/2 and worker typecheck
+passed. Full validation passed 12/12 typecheck/build, 82 unit, 58 contract, 85
+integration plus one expected skip, serialized 20/20 migrations, 4/4 browser,
+and a 233-file secret scan. Compatible security updates removed two new high
+advisories; only the four known moderate development esbuild findings remain.
+The remaining external input is a disposable PostgreSQL benchmark URL
+for the live Private Blob composition. Repeated common comparative latency/cost
+and managed-runtime interruption evidence also remain. M08 stays in progress and
+ADR-007 remains deferred; no production winner is selected.
 
 ## Exact state
 
