@@ -17,6 +17,9 @@ external-readiness audit.
 - Main implementation commit `adf03ad` contains protected Private Blob artifacts
   and migration `0009`, Temporal SDK 1.22.0 benchmark code/tests, the raw GitHub
   webhook route, live VCR/Sandbox benchmark support, and the benchmark report.
+- Live Temporal checkpoint `ee7b681` corrects the TypeScript worker entrypoint,
+  suppresses sensitive test metadata, records the completed Cloud scenario
+  matrix, and applies compatible dependency security updates.
 - Isolated Workflow commits are pushed: stable `b2a2e6389adbef2914d3a08f83c8761907820876`
   on `benchmark/workflow-stable` and beta `e2f9fb1993187b66b9154dc98d77d3571445faed`
   on `benchmark/workflow-beta5`. Never merge either benchmark branch into main.

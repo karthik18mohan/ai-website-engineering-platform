@@ -3,7 +3,7 @@
 **Checkpoint:** 2026-09-05 17:06:00 +05:30 (Asia/Calcutta)
 **Repository:** `C:\Users\HP\Desktop\ai-website-engineering-platform`  
 **Branch:** `codex/m08-isolated-runner`
-**Latest implementation commit:** `adf03ad`; Workflow benchmark commits `b2a2e63` and `e2f9fb1` are pushed on isolated branches
+**Latest implementation commit:** `ee7b681`; Workflow benchmark commits `b2a2e63` and `e2f9fb1` are pushed on isolated branches
 **Active milestone:** M08 Isolated runner - in progress
 **Completed milestones:** M01, M02, M03, M04, M05, M06, M07
 
@@ -48,6 +48,10 @@ The remaining external input is a disposable PostgreSQL benchmark URL
 for the live Private Blob composition. Repeated common comparative latency/cost
 and managed-runtime interruption evidence also remain. M08 stays in progress and
 ADR-007 remains deferred; no production winner is selected.
+
+Implementation checkpoint `ee7b681` contains the live Temporal evidence,
+launcher correction, test-log redaction and compatible dependency security
+updates. Documentation checkpoint follows this commit.
 
 ## Exact state
 

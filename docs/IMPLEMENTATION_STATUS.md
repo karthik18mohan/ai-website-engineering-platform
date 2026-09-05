@@ -3,7 +3,7 @@
 **Status timestamp:** 2026-09-05 17:06:00 +05:30 (Asia/Calcutta)
 **Authoritative specification:** `docs/product/AI_Website_Engineering_Platform_SRS_v1.1_AI_Cost_Controller.pdf`  
 **Working branch:** `codex/m08-isolated-runner`
-**Latest implementation checkpoint commit:** `adf03ad` (`feat(M08): add protected artifacts and durability evidence [codex]`)
+**Latest implementation checkpoint commit:** `ee7b681` (`fix(M08): validate Temporal Cloud durability [codex]`)
 **Pull request:** Draft PR [#8](https://github.com/karthik-ai-platform/ai-website-engineering-platform/pull/8), stacked on completed M07
 **Vercel preview:** Workflow stable and beta benchmark Previews observed; production deployment remains unauthorized
 
